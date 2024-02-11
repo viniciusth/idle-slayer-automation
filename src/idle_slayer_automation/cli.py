@@ -9,8 +9,11 @@ from idle_slayer_automation.image_processing.core import (
     startup as image_processing_startup,
 )
 
+app = typer.Typer()
 
-def main():
+
+@app.command()
+def run():
     eye_msgs = mp.Queue()
     info_msgs = mp.Queue()
     brain = mp.Process(target=decision_making_startup, args=(eye_msgs,))
@@ -23,12 +26,17 @@ def main():
             brain.terminate()
             eyes.terminate()
             return False
-        elif keyboard.KeyCode.from_char("i"):
+        elif key == keyboard.KeyCode.from_char("i"):
             info_msgs.put("toggle")
 
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
 
 
+@app.callback()
+def main():
+    pass
+
+
 if __name__ == "__main__":
-    typer.run(main)
+    app()
