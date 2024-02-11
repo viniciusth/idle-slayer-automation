@@ -17,7 +17,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["mss", "typer[all]", "pygetwindow", "pyautogui", "pynput", "pywin32"]
+dependencies = ["mss", "typer[all]", "pygetwindow", "pyautogui", "pynput", "pywin32", "opencv-python", "numpy"]
 description = ''
 dynamic = ["version"]
 keywords = []

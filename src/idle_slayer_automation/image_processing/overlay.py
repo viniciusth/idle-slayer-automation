@@ -1,13 +1,23 @@
-from collections import namedtuple
-import win32gui, win32ui, win32con, win32api
+import win32gui, win32ui, win32api
 
-WindowRect = namedtuple(
-    "WindowRect", ["left", "top", "bottom", "right", "width", "height"]
-)
+
+class WindowRect:
+    def __init__(self, left, top, bottom, right):
+        self.left = left
+        self.top = top
+        self.bottom = bottom
+        self.right = right
+        self.width = right - left
+        self.height = bottom - top
 
 
 def windows_rect(rect: WindowRect):
     return (rect.left, rect.top, rect.right, rect.bottom)
+
+
+def get_window_rect(window_hwnd):
+    left, top, right, bottom = win32gui.GetWindowRect(window_hwnd)
+    return WindowRect(left, top, bottom, right)
 
 
 class OverlayHandler:
@@ -23,12 +33,6 @@ class OverlayHandler:
             win32api.GetSystemMetrics(1),
         )
 
-    def get_window_rect(self):
-        left, top, right, bottom = win32gui.GetWindowRect(self.window_hwnd)
-        width = right - left
-        height = bottom - top
-        return WindowRect(left, top, bottom, right, width, height)
-
     def drop(self):
         self.dcObj.DeleteDC()
         win32gui.ReleaseDC(self.hwnd, self.dc)
@@ -37,7 +41,7 @@ class OverlayHandler:
         """
         Draws the FPS as text on the middle bottom of the overlay window.
         """
-        rect = self.get_window_rect()
+        rect = get_window_rect(self.window_hwnd)
         self.dcObj.TextOut(
             rect.left + rect.width // 2,
             rect.bottom - 30,
@@ -49,7 +53,7 @@ class OverlayHandler:
         """
         Draws a white rectangle outline on the overlay window.
         """
-        window_rect = self.get_window_rect()
+        window_rect = get_window_rect(self.window_hwnd)
         rect = WindowRect(
             rect.left + window_rect.left,
             rect.top + window_rect.top,
