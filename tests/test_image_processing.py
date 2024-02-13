@@ -5,7 +5,7 @@ from idle_slayer_automation.image_processing.searcher import ScreenshotSearcher
 def test_image_search_and_casting():
     byte_string = open("tests/screenshot.bytes", "rb").read()
     ScreenshotMock = namedtuple("Screenshot", ["bgra", "height", "width"])
-    screenshot = ScreenshotMock(byte_string, 1080, 1920)
+    screenshot = ScreenshotMock(byte_string, 759, 1296)
 
     searcher = ScreenshotSearcher()
 
