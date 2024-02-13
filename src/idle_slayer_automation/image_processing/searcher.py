@@ -3,15 +3,25 @@ from typing import List, TypedDict
 import numpy as np
 import cv2
 import multiprocessing as mp
+from enum import Enum
 
 from idle_slayer_automation.image_processing.rect import WindowRect
 
-SPRITES = ["chest", "offline_extra", "saver", "silver_box", "silver_boxes"]
+
+class Sprite(Enum):
+    CHEST = "chest"
+    OFFLINE_EXTRA = "offline_extra"
+    SAVER = "saver"
+    SILVER_BOX = "silver_box"
+    SILVER_BOXES = "silver_boxes"
+
+
+SPRITES = [sprite.value for sprite in Sprite]
 SPRITE_PATHS = [f"sprites/{sprite}.png" for sprite in SPRITES]
 
 
 class SearchResult(TypedDict):
-    sprite: str
+    sprite: Sprite
     rect: WindowRect
     certainty: float
 
@@ -23,8 +33,8 @@ def search_template(i, img, template) -> SearchResult | None:
     (x, y) = np.unravel_index(loc, res.shape)
     return (
         {
-            "sprite": SPRITES[i],
-            "rect": WindowRect(x, y, x + template.shape[1], y + template.shape[0]),
+            "sprite": Sprite(SPRITES[i]),
+            "rect": WindowRect(y, x, x + template.shape[0], y + template.shape[1]),
             "certainty": res[x, y],
         }
         if res[x, y] > threshold
