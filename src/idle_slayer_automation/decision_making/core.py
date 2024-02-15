@@ -29,12 +29,13 @@ def startup(toggles: mp.Queue, conn: PipeConnection):
 def gameplay():
     pyautogui.press("d")
     pyautogui.keyDown("space")
-    sleep(0.1)
-    for _ in range(5):
+    for _ in range(3):
         pyautogui.press("w")
-        sleep(0.05)
+
     pyautogui.keyUp("space")
 
+    for _ in range(3):
+        pyautogui.press("w")
 
 def handle_event(msg: SearchResult, _conn: PipeConnection):
     match msg["sprite"]:
