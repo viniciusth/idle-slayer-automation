@@ -14,6 +14,9 @@ class Sprite(Enum):
     SAVER = "saver"
     SILVER_BOX = "silver_box"
     SILVER_BOXES = "silver_boxes"
+    BOX = "box"
+    CLOSE_CHEST_HUNT = "close_chest_hunt"
+    BONUS_STAGE = "bonus_stage"
 
 
 SPRITES = [sprite.value for sprite in Sprite]
