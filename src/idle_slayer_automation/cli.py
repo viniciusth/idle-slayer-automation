@@ -1,5 +1,6 @@
 import typer
 import multiprocessing as mp
+import time
 from pynput import keyboard
 
 from idle_slayer_automation.decision_making.core import (
@@ -44,6 +45,33 @@ def run():
 
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
+
+
+@app.command()
+def record_keys(file: str = "keys.txt"):
+    with open(file, "w") as f:
+        start_time = time.time_ns()
+
+        currently_pressed = set()
+
+        def on_press(key):
+            if key == keyboard.Key.esc:
+                return False
+
+            if key in currently_pressed:
+                return
+
+            key = str(key) if key != keyboard.Key.space else "'space'"
+            currently_pressed.add(key)
+            f.write(f"{time.time_ns() - start_time}:+:{key}\n")
+
+        def on_release(key):
+            key = str(key) if key != keyboard.Key.space else "'space'"
+            currently_pressed.remove(key)
+            f.write(f"{time.time_ns() - start_time}:-:{key}\n")
+
+        with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+            listener.join()
 
 
 @app.callback()

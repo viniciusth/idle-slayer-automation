@@ -48,6 +48,7 @@ cov-report = [
   "- coverage combine",
   "coverage report",
 ]
+record = "python -m idle_slayer_automation.cli record-keys {args:file}"
 start = "python -m idle_slayer_automation.cli run"
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
