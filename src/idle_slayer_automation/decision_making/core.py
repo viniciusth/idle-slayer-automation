@@ -9,32 +9,53 @@ from idle_slayer_automation.image_processing.searcher import SearchResult, Sprit
 
 def startup(toggles: mp.Queue, conn: PipeConnection):
     do_actions = True
+    jump_strategy = 0
 
     while True:
-        if not toggles.empty():
-            toggles.get()
-            do_actions = not do_actions
+        while not toggles.empty():
+            msg = toggles.get()
+            if msg == "actions":
+                do_actions = not do_actions
+            elif msg == "jump_strategy":
+                jump_strategy = (jump_strategy + 1) % 3
 
         if not do_actions:
             sleep(0.2)
             continue
 
-        if not conn.poll():
-            gameplay()
-        else:
+        while conn.poll():
             handle_event(conn)
 
+        gameplay(jump_strategy)
 
-def gameplay():
-    pyautogui.press("d")
-    pyautogui.keyDown("space")
-    for _ in range(3):
-        pyautogui.press("w")
 
-    pyautogui.keyUp("space")
+def gameplay(jump_strategy: int):
+    match jump_strategy:
+        # Long jumps, better for getting all coins and killing non-big enemies
+        case 0:
+            pyautogui.press("d")
+            pyautogui.keyDown("space")
+            for _ in range(3):
+                pyautogui.press("w")
 
-    for _ in range(3):
-        pyautogui.press("w")
+            pyautogui.keyUp("space")
+
+            for _ in range(3):
+                pyautogui.press("w")
+
+        # Short jumps, still gets most coins and enemies, good for hills giants
+        case 1:
+            pyautogui.press("d")
+            for _ in range(5):
+                pyautogui.press("w")
+
+        # Short jumps with a delay, good for killing smaller big enemies (fairy)
+        case 2:
+            pyautogui.press("d")
+            for _ in range(5):
+                pyautogui.press("w")
+                sleep(0.03)
+            sleep(0.3)
 
 
 def handle_event(conn: PipeConnection):
@@ -83,6 +104,7 @@ def handle_event(conn: PipeConnection):
                 sleep(1)
             return
         case Sprite.SILVER_BOX | Sprite.BOX:
+            sleep(0.5)
             pyautogui.keyDown("space")
             sleep(1)
             pyautogui.keyUp("space")

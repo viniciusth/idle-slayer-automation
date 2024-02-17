@@ -39,6 +39,8 @@ def run():
             eye_toggles.put("info")
         elif key == keyboard.KeyCode.from_char("a"):
             brain_toggles.put("actions")
+        elif key == keyboard.KeyCode.from_char("j"):
+            brain_toggles.put("jump_strategy")
 
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
