@@ -7,12 +7,10 @@ from idle_slayer_automation.image_processing.rect import WindowRect
 
 from idle_slayer_automation.image_processing.searcher import SearchResult, Sprite
 
-RUNNER = ActionRunner()
-
-
 def startup(toggles: mp.Queue, conn: PipeConnection):
     do_actions = True
     jump_strategy = 0
+    runner = ActionRunner()
 
     while True:
         while not toggles.empty():
@@ -27,7 +25,7 @@ def startup(toggles: mp.Queue, conn: PipeConnection):
             continue
 
         while conn.poll():
-            handle_event(conn)
+            handle_event(conn, runner)
 
         gameplay(jump_strategy)
 
@@ -66,7 +64,7 @@ def click_middle(rect: WindowRect):
     pyautogui.click(middle_x, middle_y, duration=0.05)
 
 
-def handle_event(conn: PipeConnection):
+def handle_event(conn: PipeConnection, runner: ActionRunner):
     msg: SearchResult = conn.recv()
     match msg["sprite"]:
         case Sprite.CHEST | Sprite.SAVER:
@@ -83,11 +81,11 @@ def handle_event(conn: PipeConnection):
             sleep(0.2)
         case Sprite.BONUS_STAGE | Sprite.START_BONUS | Sprite.START_BONUS_2:
             conn.send(msg["sprite"])
-            bonus_stage(conn)
+            bonus_stage(conn, runner)
             return
         case Sprite.SECOND_WIND:
             click_middle(msg["rect"])
-            RUNNER.run(Action.BONUS_STAGE_2)
+            runner.run(Action.BONUS_STAGE_2)
             conn.send(msg["sprite"])
             return
         case x:
@@ -145,7 +143,7 @@ def chest_hunt(conn: PipeConnection):
         sleep(1)
 
 
-def bonus_stage(conn: PipeConnection):
+def bonus_stage(conn: PipeConnection, runner: ActionRunner):
     jumps = 3
     while jumps > 0:
         if jumps == 3:
@@ -179,7 +177,7 @@ def bonus_stage(conn: PipeConnection):
     # wait for the bonus stage to start
     sleep(1)
 
-    RUNNER.run(Action.BONUS_STAGE_2)
+    runner.run(Action.BONUS_STAGE_2)
     sleep(5)
 
     conn.send(msg["sprite"])
