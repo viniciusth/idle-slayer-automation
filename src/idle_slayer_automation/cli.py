@@ -50,27 +50,34 @@ def run():
 @app.command()
 def record_keys(file: str = "keys.txt"):
     with open(file, "w") as f:
-        start_time = time.time_ns()
+        start_time = None
 
         currently_pressed = set()
 
         def on_press(key):
             if key == keyboard.Key.esc:
                 return False
-
-            if key in currently_pressed:
+            if start_time == None and key == keyboard.KeyCode.from_char("s"):
                 return
 
             key = str(key) if key != keyboard.Key.space else "'space'"
+            if key in currently_pressed:
+                return
             currently_pressed.add(key)
             f.write(f"{time.time_ns() - start_time}:+:{key}\n")
 
         def on_release(key):
+            nonlocal start_time
+            if start_time == None and key == keyboard.KeyCode.from_char("s"):
+                start_time = time.time_ns()
+                print("started recording")
+                return
             key = str(key) if key != keyboard.Key.space else "'space'"
             currently_pressed.remove(key)
             f.write(f"{time.time_ns() - start_time}:-:{key}\n")
 
         with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+            print("press 's' to start recording, 'esc' to stop")
             listener.join()
 
 

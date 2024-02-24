@@ -1,45 +1,34 @@
-from collections import namedtuple
 from enum import Enum
-from typing import List
+import subprocess
 
 
 class Action(Enum):
     BONUS_STAGE_2 = "bonus_stage_2"
 
 
-ProcedureStep = namedtuple("ProcedureStep", ["begin", "end", "action"])
-
-
-class Procedure:
-    def __init__(self, filename: str):
-        self.events: List[ProcedureStep] = []
-        last_event_idx = {}
-        with open(filename, "r") as f:
-            first_timestamp = None
-            for line in f.readlines():
-                timestamp, ty, key = line.split(":")
-
-                if first_timestamp is None:
-                    first_timestamp = int(timestamp)
-                # convert to time since first event
-                timestamp = int(timestamp) - first_timestamp
-
-                if ty == "+":
-                    last_event_idx[key] = len(self.events)
-                    self.events.append(ProcedureStep(timestamp, None, key))
-                elif ty == "-":
-                    idx = last_event_idx.pop(key)
-                    self.events[idx] = self.events[idx]._replace(end=timestamp)
-        assert (
-            len(last_event_idx) == 0
-        ), f"Unmatched events: {[self.events[i] for i in last_event_idx.values()]}"
-
-    def __iter__(self):
-        return iter(self.events)
-
-
 class ActionRunner:
+    exec = None
+
     def __init__(self):
-        self.procedures = {}
+        self._build()
+        self.files = {}
         for action in Action:
-            self.procedures[action] = Procedure(f"actions/{action.value}.actions")
+            self.files[action] = f"actions/{action.value}.actions"
+
+    @classmethod
+    def _build(cls):
+        if cls.exec is None:
+            cls.exec = "actions/target/release/actions.exe"
+        else:
+            return
+        process = subprocess.Popen(
+            ["cargo", "build", "--manifest-path", "actions/Cargo.toml", "--release"]
+        )
+        process.wait()
+
+    def run(self, action: Action):
+        assert self.exec is not None
+        process = subprocess.Popen(
+            [self.exec, "play", "-f", self.files[action]], stdout=subprocess.PIPE
+        )
+        process.wait()

@@ -17,6 +17,9 @@ class Sprite(Enum):
     BOX = "box"
     CLOSE_CHEST_HUNT = "close_chest_hunt"
     BONUS_STAGE = "bonus_stage"
+    START_BONUS = "start_bonus"
+    START_BONUS_2 = "start_bonus_2"
+    SECOND_WIND = "second_wind"
 
 
 SPRITES = [sprite.value for sprite in Sprite]
@@ -43,6 +46,9 @@ def search_template(i, img, template) -> SearchResult | None:
         if res[x, y] > threshold
         else None
     )
+
+
+# TODO: we can improve performance by identifying what stage we are in and only searching for the relevant sprites
 
 
 class ScreenshotSearcher:
